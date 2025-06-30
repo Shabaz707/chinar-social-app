@@ -1,0 +1,56 @@
+{# F:\chinar\core\templates\registration\logged_out.html #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chinar - Logged Out</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        h2 {
+            color: #262626;
+            margin-bottom: 25px;
+            font-size: 2.2em;
+            font-weight: bold;
+        }
+        p {
+            color: #555;
+            margin-bottom: 20px;
+        }
+        .link a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Logged Out</h2>
+        <p>You have been successfully logged out.</p>
+        <div class="link">
+            <p><a href="{% url 'login' %}">Log in again</a></p>
+        </div>
+    </div>
+</body>
+</html>

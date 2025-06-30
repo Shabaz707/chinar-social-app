@@ -1,0 +1,111 @@
+{# F:\chinar\core\templates\create_post.html #}
+{% extends 'base.html' %}
+
+{% block title %}Chinar - Create Post{% endblock %}
+
+{% block content %}
+    <div class="form-container">
+        <h2>Create New Post</h2>
+        <form method="post">
+            {% csrf_token %} {# Django security tag #}
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <p class="helptext">{{ field.help_text }}</p>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <p class="errorlist">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            {% if form.non_field_errors %}
+                {% for error in form.non_field_errors %}
+                    <p class="errorlist">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+            <button type="submit">Share Post</button>
+        </form>
+    </div>
+{% endblock %}
+
+{% block extra_head %}
+    <style>
+        .form-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            margin: 30px auto;
+            box-sizing: border-box;
+        }
+        .form-container h2 {
+            text-align: center;
+            color: #262626;
+            margin-bottom: 30px;
+            font-size: 2em;
+            font-weight: bold;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+        input[type="text"],
+        textarea {
+            width: calc(100% - 20px); /* Account for padding */
+            padding: 12px 10px;
+            border: 1px solid #dbdbdb;
+            border-radius: 8px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+        input[type="text"]:focus,
+        textarea:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+        textarea {
+            resize: vertical; /* Allow vertical resizing */
+            min-height: 100px;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #007bff; /* Primary blue */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .errorlist {
+            color: #e74c3c;
+            list-style-type: none;
+            padding: 0;
+            margin-top: 10px;
+            text-align: left;
+            font-size: 0.9em;
+        }
+        .helptext {
+            font-size: 0.85em;
+            color: #777;
+            margin-top: 5px;
+            text-align: left;
+        }
+    </style>
+{% endblock %}

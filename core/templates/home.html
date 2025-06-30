@@ -1,0 +1,189 @@
+{# F:\chinar\core\templates\home.html #}
+{% extends 'base.html' %} {# Extends the base template #}
+
+{% block title %}Chinar - Home{% endblock %}
+
+{% block content %}
+    <h2 style="text-align: center; color: #262626; margin-bottom: 25px;">Welcome to Chinar!</h2>
+
+    {% if posts %}
+        <div class="posts-list">
+            {% for post in posts %}
+                <div class="post-card">
+                    <div class="post-header">
+                        <img src="https://placehold.co/50x50/RANDOM_COLOR/FFFFFF?text={{ post.user.username|slice:":2"|upper }}" alt="{{ post.user.username }}" class="post-avatar">
+                        <span class="post-username">{{ post.user.username }}</span>
+                        <span class="post-time">{{ post.timestamp|timesince }} ago</span>
+                    </div>
+                    <div class="post-image-container">
+                        <img src="{{ post.image_url }}" alt="Post Image" class="post-image"
+                             onerror="this.onerror=null;this.src='https://placehold.co/600x400/CCCCCC/000000?text=Image+Not+Found';">
+                    </div>
+                    <div class="post-actions">
+                        <button class="like-button {% if post.is_liked_by_user %}liked{% endif %}" data-post-id="{{ post.id }}">
+                            <span class="like-icon">{% if post.is_liked_by_user %}❤️{% else %}🤍{% endif %}</span>
+                            <span id="likes-{{ post.id }}">{{ post.likes }}</span>
+                        </button>
+                        {# Add comment and share buttons later #}
+                    </div>
+                    <div class="post-caption">
+                        <span class="post-username">{{ post.user.username }}</span> {{ post.caption }}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p style="text-align: center; color: #555; margin-top: 30px;">No posts yet. Be the first to share something!</p>
+    {% endif %}
+{% endblock %}
+
+{% block extra_head %}
+    <style>
+        .posts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .post-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        .post-header {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .post-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 10px;
+            border: 2px solid #007bff; /* Small border for avatars */
+        }
+        .post-username {
+            font-weight: 700;
+            color: #262626;
+            margin-right: auto; /* Pushes time to the right */
+        }
+        .post-time {
+            font-size: 0.85em;
+            color: #888;
+        }
+        .post-image-container {
+            width: 100%;
+            background-color: #f0f0f0; /* Placeholder background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px; /* Minimum height for image container */
+        }
+        .post-image {
+            width: 100%;
+            height: auto;
+            display: block; /* Remove extra space below image */
+        }
+        .post-actions {
+            padding: 10px 15px;
+            display: flex;
+            gap: 15px;
+        }
+        .like-button {
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            border-radius: 6px;
+            transition: background-color 0.2s ease;
+        }
+        .like-button:hover {
+            background-color: #f0f0f0;
+        }
+        .like-button .like-icon {
+            font-size: 1.5em; /* Make the heart icon slightly larger */
+        }
+        .like-button.liked .like-icon {
+            color: #ff3040; /* Red color for liked heart */
+        }
+        .post-caption {
+            padding: 0 15px 15px;
+            font-size: 0.95em;
+            line-height: 1.4;
+            color: #333;
+        }
+        .post-caption .post-username {
+            margin-right: 5px;
+        }
+    </style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Function to get CSRF token from cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Add event listeners to all like buttons
+    document.addEventListener('DOMContentLoaded', function() {
+        const likeButtons = document.querySelectorAll('.like-button');
+        likeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const postId = this.dataset.postId;
+                const likesSpan = this.querySelector('span:last-child'); // Get the span element displaying likes count
+                const likeIcon = this.querySelector('.like-icon'); // Get the span element for the icon
+
+                // Send an AJAX request to the Django backend
+                fetch('{% url "like_post" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': getCookie('csrftoken') // Include CSRF token
+                    },
+                    body: `post_id=${postId}` // Send post_id in the request body
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        likesSpan.textContent = data.likes; // Update the likes count on the page
+                        if (data.action === 'liked') {
+                            likeIcon.textContent = '❤️'; // Change to filled heart
+                            button.classList.add('liked'); // Add 'liked' class for styling
+                        } else {
+                            likeIcon.textContent = '🤍'; // Change to empty heart
+                            button.classList.remove('liked'); // Remove 'liked' class
+                        }
+                    } else {
+                        console.error('Error liking post:', data.error);
+                        alert('Could not like post: ' + data.error); // Simple alert for error
+                    }
+                })
+                .catch(error => {
+                    console.error('Network error:', error);
+                    alert('Network error: Could not connect to server.');
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}
