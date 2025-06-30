@@ -10,8 +10,7 @@
         startCommand: "gunicorn chinar_project.wsgi:application --log-file -"
         healthCheckPath: /admin/login/
         envVars:
-          - key: DATABASE_URL
-            fromDatabase: chinar_db # Use fromDatabase for simpler linking to blueprint-defined database
+          # We will set DATABASE_URL manually in Render UI after blueprint deployment
           - key: SECRET_KEY
             generateValue: true
           - key: DEBUG
@@ -24,7 +23,5 @@
       - type: pserv
         name: chinar_db
         plan: free
-        # No other properties like buildCommand, startCommand, healthCheckPath, envVars, or runtime
-        # are needed or allowed for a simple pserv (managed database service).
-        # This minimal definition is correct.
+        # No other properties are needed for a simple pserv
     
